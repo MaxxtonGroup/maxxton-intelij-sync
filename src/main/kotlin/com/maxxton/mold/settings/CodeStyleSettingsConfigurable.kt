@@ -8,7 +8,7 @@ import javax.swing.JComponent
 class CodeStyleSettingsConfigurable : Configurable {
     private var settingsComponent: CodeStyleSettingsComponent? = null
 
-    override fun getDisplayName() = "Maxxton Code Style"
+    override fun getDisplayName() = "Mold"
 
     override fun createComponent(): JComponent {
         settingsComponent = CodeStyleSettingsComponent()

@@ -29,6 +29,6 @@
         parentId="tools"
         instance="com.maxxton.mold.settings.CodeStyleSettingsConfigurable"
         id="com.maxxton.mold.settings.CodeStyleSettingsConfigurable"
-        displayName="Maxxton Code Style"/>
+        displayName="Mold"/>
   </extensions>
 </idea-plugin>

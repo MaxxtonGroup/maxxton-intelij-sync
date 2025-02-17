@@ -21,7 +21,7 @@ It shapes the codebase through an agreed-upon definition and helps maintain cons
 3. Select `Install Plugin from Disk...`
 4. Select the `.zip` file from the `./build/distributions/` directory of this project.
 
-## Testing the plugin
+## Using the plugin
 
 1. Open the IntelliJ IDEA settings.
 2. Head to Tools -> Mold 

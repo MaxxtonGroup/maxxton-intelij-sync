@@ -77,7 +77,7 @@ class CodeStyleSyncActivity : ProjectActivity {
   private fun showRestartNotification() {
     ApplicationManager.getApplication().invokeLater {
       val notification = NotificationGroupManager.getInstance()
-        .getNotificationGroup("Maxxton IDE Config")
+        .getNotificationGroup("Mold")
         .createNotification(
           "IDE configuration updated",
           "Please restart IntelliJ IDEA for the changes to take effect",

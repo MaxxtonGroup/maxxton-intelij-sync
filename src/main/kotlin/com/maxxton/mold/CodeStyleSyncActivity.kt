@@ -9,9 +9,11 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.startup.ProjectActivity
 import com.jetbrains.rd.util.printlnError
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
+import java.util.stream.Collectors
 import kotlin.io.path.*
 
 class CodeStyleSyncActivity : ProjectActivity {
@@ -25,21 +27,29 @@ class CodeStyleSyncActivity : ProjectActivity {
 
   private fun syncCodeStyle() {
     val config = ApplicationManager.getApplication().getService(CodeStyleConfig::class.java)
+
+    if (config.state.repoUrl.isBlank()) {
+      showNotification(
+        "Repository URL is not configured. Please set it in Settings | Tools | Mold.",
+        NotificationType.ERROR
+      )
+      return
+    }
+
     val tempDir = Files.createTempDirectory("maxxton-codestyle")
 
     try {
       // Use config.state.repoUrl instead of hardcoded value
       val process = ProcessBuilder()
-        .command("git", "clone", "--depth", "1", config.state.repoUrl, tempDir.toString())
-        .redirectErrorStream(true)
+        .command("git", "clone", "--depth", "1", config.state.repoUrl.trim(), tempDir.toString())
         .start()
 
-      // Log output
-      process.inputStream.bufferedReader().useLines { lines ->
-        lines.forEach { println("Git: $it") }
-      }
+      val errorOutput = BufferedReader(InputStreamReader(process.errorStream))
+        .lines()
+        .collect(Collectors.joining("\n"))
 
       if (process.waitFor() != 0) {
+        showNotification("Failed to clone the Git repository: $errorOutput", NotificationType.ERROR)
         throw IllegalStateException("Git clone failed")
       }
 
@@ -62,15 +72,25 @@ class CodeStyleSyncActivity : ProjectActivity {
         inspectionsDir.resolve("MaxxtonInspections.xml")
       )
 
-      // Update scheme settings
-      updateCodeStyleSchemes(optionsDir)
-      updateEditorSettings(optionsDir)
-
       if (hasChanged) {
+        showNotification("Updating IDE settings...")
+        updateCodeStyleSchemes(optionsDir)
+        updateInspections(optionsDir)
         showRestartNotification()
+      } else {
+        showNotification("IDE settings are up to date!")
       }
     } finally {
       tempDir.toFile().deleteRecursively()
+    }
+  }
+
+  private fun showNotification(content: String, type: NotificationType = NotificationType.INFORMATION) {
+    ApplicationManager.getApplication().invokeLater {
+      val notification = NotificationGroupManager.getInstance()
+        .getNotificationGroup("Mold")
+        .createNotification(content, type)
+      notification.notify(null)
     }
   }
 
@@ -121,14 +141,25 @@ class CodeStyleSyncActivity : ProjectActivity {
   }
 
   private fun copyIfDifferent(source: Path, target: Path): Boolean {
-    if (!Files.exists(target) || Files.mismatch(source, target) != -1L) {
-      Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING)
+    val sourceContent = Files.readString(source).replace("\r\n", "\n")
+    val targetContent = getTargetContent(target)
+
+    if (sourceContent != targetContent) {
+      Files.writeString(target, sourceContent)
       println("Updated ${target.fileName}")
-      return true;
+      return true
     }
 
     println("${target.fileName} is already up to date")
-    return false;
+    return false
+  }
+
+  private fun getTargetContent(target: Path): String {
+    if (Files.notExists(target)) {
+      return ""
+    }
+
+    return Files.readString(target).replace("\r\n", "\n")
   }
 
   private fun updateCodeStyleSchemes(optionsDir: Path) {
@@ -141,7 +172,7 @@ class CodeStyleSyncActivity : ProjectActivity {
     schemesFile.writeText(content)
   }
 
-  private fun updateEditorSettings(optionsDir: Path) {
+  private fun updateInspections(optionsDir: Path) {
     val editorFile = optionsDir.resolve("editor.xml")
     val content = """
           <application>

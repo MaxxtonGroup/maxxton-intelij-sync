@@ -14,7 +14,7 @@ class CodeStyleConfig : PersistentStateComponent<CodeStyleConfig.State> {
     private var myState = State()
 
     data class State(
-        var repoUrl: String = "ssh://git@bitbucket.yourdomain.com"
+        var repoUrl: String = "ssh://git@bitbucket.maxxton.com:7999/mxtc/ide-config.git"
     )
 
     override fun getState(): State = myState

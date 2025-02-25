@@ -5,7 +5,17 @@ It shapes the codebase through an agreed-upon definition and helps maintain cons
 
 ## Installing the plugin
 
-1. https://plugins.jetbrains.com/plugin/26556-mold
+1. Download the latest `.jar. file from [the releases](https://github.com/MaxxtonGroup/maxxton-intelij-sync/releases/latest)
+2. Open IntelliJ IDEA CE.
+3. Click the gear (settings) icon in the top right.
+4. Select `Plugins`.
+5. Click the `gear` icon in the plugins popup.
+6. Select `Install Plugin from disk...`.
+7. Select the `.jar` file you downloaded.
+8. Restart IntelliJ IDEA.
+9. Open a project and read any notifications you might receive.
+
+If something does not quite work, or if you see any improvements, please reach out to me (Mischa) on Slack.
 
 ## Building the plugin
 
@@ -24,5 +34,5 @@ It shapes the codebase through an agreed-upon definition and helps maintain cons
 ## Using the plugin
 
 1. Open the IntelliJ IDEA settings.
-2. Head to Tools -> Mold 
+2. Head to Tools -> Mold
 3. Configure the correct repository URL containing the MaxxtonCodeStyle

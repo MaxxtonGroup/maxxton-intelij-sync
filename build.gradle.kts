@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-  implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.8.0.202311291450-r")
+  implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:7.1.0.202411261347-r")
 
   intellijPlatform {
     val version = providers.gradleProperty("platformVersion")

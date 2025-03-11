@@ -2,12 +2,12 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "1.9.25"
-  id("org.jetbrains.intellij.platform") version "2.2.1"
+  id("org.jetbrains.kotlin.jvm") version "2.1.10"
+  id("org.jetbrains.intellij.platform") version "2.3.0"
 }
 
 group = "com.maxxton"
-version = "1.0.2"
+version = "1.0.3"
 
 repositories {
   mavenCentral()
@@ -18,8 +18,6 @@ repositories {
 }
 
 dependencies {
-  implementation("org.eclipse.jgit:org.eclipse.jgit.ssh.jsch:6.8.0.202311291450-r")
-
   intellijPlatform {
     val version = providers.gradleProperty("platformVersion")
     create(IntelliJPlatformType.IntellijIdeaCommunity, version)
@@ -35,8 +33,11 @@ tasks {
     sourceCompatibility = "21"
     targetCompatibility = "21"
   }
+
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions.jvmTarget = "21"
+    compilerOptions {
+      jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21)
+    }
   }
 
   patchPluginXml {

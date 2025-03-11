@@ -3,7 +3,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 plugins {
   id("java")
   id("org.jetbrains.kotlin.jvm") version "1.9.25"
-  id("org.jetbrains.intellij.platform") version "2.2.1"
+  id("org.jetbrains.intellij.platform") version "2.3.0"
 }
 
 group = "com.maxxton"

@@ -26,14 +26,14 @@ class CodeStyleSyncActivity : ProjectActivity {
     println("Syncing code style...")
 
     try {
-      syncCodeStyle(project)
+      syncCodeStyle()
       println("Code style sync complete")
     } catch (e: Exception) {
       printlnError("Failed to sync code style: $e")
     }
   }
 
-  private fun syncCodeStyle(project: Project) {
+  private fun syncCodeStyle() {
     val config = ApplicationManager.getApplication().getService(CodeStyleConfig::class.java)
 
     if (config.state.repoUrl.isBlank()) {

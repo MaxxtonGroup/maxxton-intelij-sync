@@ -19,7 +19,7 @@
   <description>A simple settings synchronisation plugin for Maxxton developers.</description>
 
   <!-- Compatibility with IntelliJ platform products -->
-  <idea-version since-build="181.3" />
+  <idea-version since-build="243" until-build="243.*" />
 
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->

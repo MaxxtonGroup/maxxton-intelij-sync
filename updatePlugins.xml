@@ -22,6 +22,6 @@ available at this repository.
     The <idea-version> element (required) must match the same element
     in the plugin.xml file.
     -->
-        <idea-version since-build="181.3" />
+        <idea-version since-build="243" until-build="243.*" />
     </plugin>
 </plugins>

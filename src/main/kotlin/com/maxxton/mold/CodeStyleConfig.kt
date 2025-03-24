@@ -7,19 +7,20 @@ import com.intellij.openapi.components.Storage
 
 @Service
 @State(
-    name = "CodeStyleConfig",
-    storages = [Storage("maxxton-codestyle.xml")]
+  name = "CodeStyleConfig",
+  storages = [Storage("maxxton-codestyle.xml")]
 )
 class CodeStyleConfig : PersistentStateComponent<CodeStyleConfig.State> {
-    private var myState = State()
+  private var myState = State()
 
-    data class State(
-        var repoUrl: String = "ssh://git@bitbucket.maxxton.com:7999/mxtc/ide-config.git"
-    )
+  data class State(
+    var repoUrl: String = "git@github.com:MaxxtonGroup/ide-config.git",
+    var httpsRepoUrl: String = "https://github.com/MaxxtonGroup/ide-config.git"
+  )
 
-    override fun getState(): State = myState
+  override fun getState(): State = myState
 
-    override fun loadState(state: State) {
-        myState = state
-    }
+  override fun loadState(state: State) {
+    myState = state
+  }
 }

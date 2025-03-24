@@ -1,27 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-The <plugins> element (required) contains the description of the plugins
-available at this repository.
--->
 <plugins>
-    <!--
+  <!--
   Each <plugin> element (required) describes one plugin in the repository.
   Attributes:
-   - "id" (required) - used by JetBrains IDEs to uniquely identify
-     a plugin. Must match <id> in the plugin.xml file.
-   - "url" (required) - URL to download the plugin JAR/ZIP file.
-     Must be HTTPS.
-   - "version" (required) - version of this plugin. Must match <version>
-     in the plugin.xml file.
+   - "id" (required) - used by JetBrains IDEs to uniquely identify a plugin. Must match <id> in the plugin.xml file.
+   - "url" (required) - URL to download the plugin JAR/ZIP file. Must be HTTPS.
+   - "version" (required) - version of this plugin. Must match <version> in the plugin.xml file.
   -->
-    <plugin
-        id="com.maxxton.mold"
-        url="https://github.com/MaxxtonGroup/maxxton-intelij-sync/releases/download/v1.2.0/plugin-1.0.2.zip"
-        version="1.2.0">
-        <!--
-    The <idea-version> element (required) must match the same element
-    in the plugin.xml file.
+  <plugin
+    id="com.maxxton.mold"
+    url="https://github.com/MaxxtonGroup/maxxton-intelij-sync/releases/download/v1.3.0/plugin-1.3.0.zip"
+    version="1.3.0">
+    <!--
+    The <idea-version> element (required) must match the same element in the plugin.xml file.
     -->
-        <idea-version since-build="243" until-build="243.*" />
-    </plugin>
+    <idea-version since-build="243" until-build="243.*" />
+  </plugin>
 </plugins>

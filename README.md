@@ -11,10 +11,11 @@ It shapes the codebase through an agreed-upon definition and helps maintain cons
 4. Click the `gear` icon in the plugins popup.
 5. Select `Manage Plugin Repositories`.
 6. Copy [https://raw.githubusercontent.com/MaxxtonGroup/maxxton-intelij-sync/refs/heads/main/updatePlugins.xml](https://raw.githubusercontent.com/MaxxtonGroup/maxxton-intelij-sync/refs/heads/main/updatePlugins.xml) 
-7. Click the plus icon.
-8. Paste the copied URL.
-9. Restart IntelliJ IDEA.
-10. Done
+7. Click the `+` icon and paste the copied URL.
+8. Switch to the `Marketplace` tab of the `Plugins` tab.
+9. Search for a plugin called `Mold` - if you can't find it try searching for this instead: `/repository:"https://raw.githubusercontent.com/MaxxtonGroup/maxxton-intelij-sync/refs/heads/main/updatePlugins.xml"`
+10. Install it and restart IntelliJ.
+11. Done.
 
 If something does not quite work, or if you see any improvements, please reach out to me (Mischa) on Slack.
 

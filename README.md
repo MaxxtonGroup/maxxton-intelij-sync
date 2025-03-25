@@ -5,15 +5,16 @@ It shapes the codebase through an agreed-upon definition and helps maintain cons
 
 ## Installing the plugin
 
-1. Download the latest `.jar. file from [the releases](https://github.com/MaxxtonGroup/maxxton-intelij-sync/releases/latest)
-2. Open IntelliJ IDEA CE.
-3. Click the gear (settings) icon in the top right.
-4. Select `Plugins`.
-5. Click the `gear` icon in the plugins popup.
-6. Select `Install Plugin from disk...`.
-7. Select the `.jar` file you downloaded.
-8. Restart IntelliJ IDEA.
-9. Open a project and read any notifications you might receive.
+1. Open IntelliJ IDEA CE.
+2. Click the gear (settings) icon in the top right.
+3. Select `Plugins`.
+4. Click the `gear` icon in the plugins popup.
+5. Select `Manage Plugin Repositories`.
+6. Copy [https://raw.githubusercontent.com/MaxxtonGroup/maxxton-intelij-sync/refs/heads/main/updatePlugins.xml](https://raw.githubusercontent.com/MaxxtonGroup/maxxton-intelij-sync/refs/heads/main/updatePlugins.xml) 
+7. Click the plus icon.
+8. Paste the copied URL.
+9. Restart IntelliJ IDEA.
+10. Done
 
 If something does not quite work, or if you see any improvements, please reach out to me (Mischa) on Slack.
 

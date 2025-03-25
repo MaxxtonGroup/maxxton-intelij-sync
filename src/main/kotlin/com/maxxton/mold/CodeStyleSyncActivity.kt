@@ -35,8 +35,7 @@ class CodeStyleSyncActivity : ProjectActivity {
 
   private fun syncCodeStyle() {
     val config = ApplicationManager.getApplication().getService(CodeStyleConfig::class.java)
-
-    if (config.state.repoUrl.isBlank()) {
+    if (config.state.repoUrl.isBlank() && config.state.httpsRepoUrl.isBlank()) {
       showNotification(
         "Repository URL is not configured. Please set it in Settings -> Tools -> Mold.",
         NotificationType.ERROR
@@ -45,24 +44,45 @@ class CodeStyleSyncActivity : ProjectActivity {
     }
 
     val tempDir = Files.createTempDirectory("maxxton-codestyle")
+    try {
+      // First try SSH URL
+      if (config.state.repoUrl.isNotBlank() && tryCloneRepository(config.state.repoUrl.trim(), tempDir)) {
+        updateConfigFiles(tempDir)
+        return
+      }
 
+      // Fall back to HTTPS URL if SSH fails
+      if (config.state.httpsRepoUrl.isNotBlank() && tryCloneRepository(config.state.httpsRepoUrl.trim(), tempDir)) {
+        updateConfigFiles(tempDir)
+        return
+      }
+
+      showNotification("Failed to clone the Git repository using both SSH and HTTPS URLs", NotificationType.ERROR)
+      throw IllegalStateException("Git clone failed with both URLs")
+    } finally {
+      tempDir.toFile().deleteRecursively()
+    }
+  }
+
+  private fun tryCloneRepository(url: String, tempDir: Path): Boolean {
     try {
       val process = ProcessBuilder()
-        .command("git", "clone", "--depth", "1", config.state.repoUrl.trim(), tempDir.toString())
+        .command("git", "clone", "--depth", "1", url, tempDir.toString())
         .start()
 
       val errorOutput = BufferedReader(InputStreamReader(process.errorStream))
         .lines()
         .collect(Collectors.joining("\n"))
 
-      if (process.waitFor() != 0) {
-        showNotification("Failed to clone the Git repository: $errorOutput", NotificationType.ERROR)
-        throw IllegalStateException("Git clone failed")
+      return if (process.waitFor() == 0) {
+        true
+      } else {
+        println("Failed to clone using URL $url: $errorOutput")
+        false
       }
-
-      updateConfigFiles(tempDir)
-    } finally {
-      tempDir.toFile().deleteRecursively()
+    } catch (e: Exception) {
+      println("Exception while cloning using URL $url: ${e.message}")
+      return false
     }
   }
 

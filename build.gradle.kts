@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.maxxton"
-version = "1.0.3"
+version = "1.3.0"
 
 repositories {
   mavenCentral()

@@ -7,9 +7,14 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.startup.ProjectActivity
 import com.jetbrains.rd.util.printlnError
+import git4idea.commands.Git
+import git4idea.commands.GitCommand
+import git4idea.commands.GitLineHandler
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Path
@@ -65,6 +70,34 @@ class CodeStyleSyncActivity : ProjectActivity {
   }
 
   private fun tryCloneRepository(url: String, tempDir: Path): Boolean {
+    if (tryCloneWithIntelliJGit(url, tempDir)) {
+      println("Cloning using IntelliJ's Git API")
+      return true
+    }
+
+    println("Falling back to cloning using Git command line")
+    return tryCloneWithCommandLineGit(url, tempDir)
+  }
+
+  private fun tryCloneWithIntelliJGit(url: String, tempDir: Path): Boolean {
+    try {
+      val project = ProjectManager.getInstance().defaultProject
+      val git = Git.getInstance()
+
+      val handler = GitLineHandler(project, File(tempDir.toString()), GitCommand.CLONE)
+      handler.addParameters("--depth", "1", url)
+      handler.endOptions()
+      handler.addParameters(tempDir.toString())
+
+      val result = git.runCommand(handler)
+      return result.success()
+    } catch (e: Exception) {
+      println("Exception while cloning with IntelliJ Git API using URL $url: ${e.message}")
+      return false
+    }
+  }
+
+  private fun tryCloneWithCommandLineGit(url: String, tempDir: Path): Boolean {
     try {
       val process = ProcessBuilder()
         .command("git", "clone", "--depth", "1", url, tempDir.toString())
@@ -81,7 +114,7 @@ class CodeStyleSyncActivity : ProjectActivity {
         false
       }
     } catch (e: Exception) {
-      println("Exception while cloning using URL $url: ${e.message}")
+      println("Exception while cloning using command-line git with URL $url: ${e.message}")
       return false
     }
   }

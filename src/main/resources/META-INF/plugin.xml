@@ -8,7 +8,7 @@
   <name>Mold</name>
 
   <!-- Plugin version -->
-  <version>1.3.0</version>
+  <version>1.4.0</version>
 
   <!-- Compatibility with IntelliJ platform products -->
   <idea-version since-build="243" />
@@ -26,6 +26,8 @@
   <!-- Product and plugin compatibility requirements.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
   <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.vcs</depends>
+  <depends>Git4Idea</depends>
 
   <!-- Extension points defined by the plugin.
        Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->

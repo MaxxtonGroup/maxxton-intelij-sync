@@ -2,12 +2,12 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 plugins {
   id("java")
-  id("org.jetbrains.kotlin.jvm") version "2.1.10"
-  id("org.jetbrains.intellij.platform") version "2.3.0"
-}
+  id("org.jetbrains.kotlin.jvm") version "2.1.20"
+  id("org.jetbrains.intellij.platform") version "2.4.0"
+  }
 
 group = "com.maxxton"
-version = "1.3.0"
+version = "1.4.0"
 
 repositories {
   mavenCentral()
@@ -21,6 +21,7 @@ dependencies {
   intellijPlatform {
     val version = providers.gradleProperty("platformVersion")
     create(IntelliJPlatformType.IntellijIdeaCommunity, version)
+    bundledPlugin("Git4Idea")
   }
 }
 
@@ -42,7 +43,6 @@ tasks {
 
   patchPluginXml {
     sinceBuild.set("243")
-    untilBuild.set("243.*")
   }
 
   signPlugin {

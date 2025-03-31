@@ -7,14 +7,22 @@ import com.intellij.notification.NotificationType
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.startup.ProjectActivity
 import com.jetbrains.rd.util.printlnError
+import git4idea.commands.Git
+import git4idea.commands.GitCommand
+import git4idea.commands.GitLineHandler
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors
-import kotlin.io.path.*
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -52,7 +60,11 @@ class CodeStyleSyncActivity : ProjectActivity {
       }
 
       // Fall back to HTTPS URL if SSH fails
-      if (config.state.httpsRepoUrl.isNotBlank() && tryCloneRepository(config.state.httpsRepoUrl.trim(), tempDir)) {
+      if (config.state.httpsRepoUrl.isNotBlank() && tryCloneRepository(
+          config.state.httpsRepoUrl.trim(),
+          tempDir
+        )
+      ) {
         updateConfigFiles(tempDir)
         return
       }
@@ -65,6 +77,34 @@ class CodeStyleSyncActivity : ProjectActivity {
   }
 
   private fun tryCloneRepository(url: String, tempDir: Path): Boolean {
+    if (tryCloneWithIntelliJGit(url, tempDir)) {
+      println("Cloning using IntelliJ's Git API")
+      return true
+    }
+
+    println("Falling back to cloning using Git command line")
+    return tryCloneWithCommandLineGit(url, tempDir)
+  }
+
+  private fun tryCloneWithIntelliJGit(url: String, tempDir: Path): Boolean {
+    try {
+      val project = ProjectManager.getInstance().defaultProject
+      val git = Git.getInstance()
+
+      val handler = GitLineHandler(project, File(tempDir.toString()), GitCommand.CLONE)
+      handler.addParameters("--depth", "1", url)
+      handler.endOptions()
+      handler.addParameters(tempDir.toString())
+
+      val result = git.runCommand(handler)
+      return result.success()
+    } catch (e: Exception) {
+      println("Exception while cloning with IntelliJ Git API using URL $url: ${e.message}")
+      return false
+    }
+  }
+
+  private fun tryCloneWithCommandLineGit(url: String, tempDir: Path): Boolean {
     try {
       val process = ProcessBuilder()
         .command("git", "clone", "--depth", "1", url, tempDir.toString())
@@ -81,41 +121,64 @@ class CodeStyleSyncActivity : ProjectActivity {
         false
       }
     } catch (e: Exception) {
-      println("Exception while cloning using URL $url: ${e.message}")
+      println("Exception while cloning using command-line Git with URL $url: ${e.message}")
       return false
     }
   }
 
   private fun updateConfigFiles(tempDir: Path) {
-    // Get IntelliJ config directory
-    val configDir = getConfigDir() ?: throw IllegalStateException("Could not find IntelliJ config directory")
-
-    // Setup directories
-    val codestyleDir = configDir.resolve("codestyles").apply { createDirectories() }
-    val inspectionsDir = configDir.resolve("inspection").apply { createDirectories() }
-    val optionsDir = configDir.resolve("options").apply { createDirectories() }
-
-    // Copy files
-    val changes = mutableListOf<String>()
-
-    if (copyIfDifferent(tempDir.resolve("intellij/MaxxtonCodeStyle.xml"), codestyleDir.resolve("MaxxtonCodeStyle.xml"))) {
-      changes.add("MaxxtonCodeStyle.xml")
+    // Get IntelliJ config directories
+    val configDirs = getConfigDirs()
+    if (configDirs.isEmpty()) {
+      throw IllegalStateException("Could not find any IntelliJ config directories")
     }
 
-    if (copyIfDifferent(tempDir.resolve("intellij/MaxxtonInspections.xml"), inspectionsDir.resolve("MaxxtonInspections.xml"))) {
-      changes.add("MaxxtonInspections.xml")
+    val allChanges = mutableListOf<String>()
+
+    // Apply changes to each IntelliJ installation
+    configDirs.forEach { configDir ->
+      // Setup directories
+      val codestyleDir = configDir.resolve("codestyles").apply { createDirectories() }
+      val inspectionsDir = configDir.resolve("inspection").apply { createDirectories() }
+
+      // Copy files
+      val changes = mutableListOf<String>()
+
+      val codeStyleSource = tempDir.resolve("intellij/MaxxtonCodeStyle.xml")
+      val codeStyleTarget = codestyleDir.resolve("MaxxtonCodeStyle.xml")
+
+      if (copyIfDifferent(codeStyleSource, codeStyleTarget)) {
+        changes.add("MaxxtonCodeStyle.xml in ${configDir.fileName}")
+      }
+
+      val inspectionsSource = tempDir.resolve("intellij/MaxxtonInspections.xml")
+      val inspectionsTarget = inspectionsDir.resolve("MaxxtonInspections.xml")
+
+      if (copyIfDifferent(inspectionsSource, inspectionsTarget)) {
+        changes.add("MaxxtonInspections.xml in ${configDir.fileName}")
+      }
+
+      if (changes.isNotEmpty()) {
+        allChanges.addAll(changes)
+      }
     }
 
-    if (changes.isNotEmpty()) {
-      updateCodeStyleSchemes(optionsDir)
-      updateInspections(optionsDir)
-      showRestartNotification(changes)
+    if (allChanges.isNotEmpty()) {
+      showRestartNotification(allChanges)
     } else {
-      showNotification("IDE Config is up-to-date!", NotificationType.INFORMATION, upToDateNotificationDuration.milliseconds)
+      showNotification(
+        "IDE Config is up-to-date!",
+        NotificationType.INFORMATION,
+        upToDateNotificationDuration.milliseconds
+      )
     }
   }
 
-  private fun showNotification(content: String, type: NotificationType = NotificationType.INFORMATION, duration: Duration = Duration.ZERO) {
+  private fun showNotification(
+    content: String,
+    type: NotificationType = NotificationType.INFORMATION,
+    duration: Duration = Duration.ZERO
+  ) {
     ApplicationManager.getApplication().invokeLater {
       val notification = NotificationGroupManager.getInstance()
         .getNotificationGroup("Mold")
@@ -150,24 +213,15 @@ class CodeStyleSyncActivity : ProjectActivity {
         }
       })
 
-      if (changes.isNotEmpty()) {
-        notification.addAction(object : NotificationAction("View changes") {
-          override fun actionPerformed(e: AnActionEvent, notification: Notification) {
-            notification.expire()
-            showNotification("Updated files: ${changes.joinToString(", ")}")
-          }
-        })
-      }
-
       notification.notify(null)
     }
   }
 
-  private fun getConfigDir(): Path? {
+  private fun getConfigDirs(): List<Path> {
     val userHome = System.getProperty("user.home")
     val osName = System.getProperty("os.name").lowercase()
 
-    return when {
+    val basePath = when {
       osName.contains("mac") -> {
         Path(userHome).resolve("Library/Application Support/JetBrains")
       }
@@ -180,25 +234,33 @@ class CodeStyleSyncActivity : ProjectActivity {
         Path(System.getenv("APPDATA")).resolve("JetBrains")
       }
 
-      else -> null
-    }?.let { basePath ->
-      basePath.listDirectoryEntries()
-        .filter { it.name.startsWith("IdeaIC") || it.name.startsWith("IntelliJIdea") }
-        .maxByOrNull { it.name }
+      else -> return emptyList()
     }
+
+    // Return all IntelliJ IDEA directories
+    return basePath.listDirectoryEntries()
+      .filter { it.name.startsWith("IdeaIC") || it.name.startsWith("IntelliJIdea") }
+      .toList()
   }
 
   private fun copyIfDifferent(source: Path, target: Path): Boolean {
-    val sourceContent = Files.readString(source).replace("\r\n", "\n")
-    val targetContent = getTargetContent(target)
+    val sourceContent = Files.readString(source)
+    println("Source file: ${source.fileName} (${sourceContent.lines().size} lines)")
 
-    if (sourceContent != targetContent) {
+    val existingContent = getTargetContent(target)
+    println("Existing file: ${target.fileName} (${existingContent.lines().size} lines)")
+
+    val normalizedSource = sourceContent.lines().joinToString("\n") { it.trim() }
+    val normalizedExisting = existingContent.lines().joinToString("\n") { it.trim() }
+
+    if (normalizedSource != normalizedExisting) {
       Files.writeString(target, sourceContent)
       println("Updated ${target.fileName}")
       return true
     }
 
     println("${target.fileName} is already up to date")
+
     return false
   }
 
@@ -207,26 +269,6 @@ class CodeStyleSyncActivity : ProjectActivity {
       return ""
     }
 
-    return Files.readString(target).replace("\r\n", "\n")
-  }
-
-  private fun updateCodeStyleSchemes(optionsDir: Path) {
-    val schemesFile = optionsDir.resolve("code.style.schemes.xml")
-    val content = """
-          <component name="CodeStyleSchemeSettings">
-            <option name="CURRENT_SCHEME_NAME" value="Maxxton Code Style" />
-          </component>
-      """.trimIndent()
-    schemesFile.writeText(content)
-  }
-
-  private fun updateInspections(optionsDir: Path) {
-    val editorFile = optionsDir.resolve("editor.xml")
-    val content = """
-          <application>
-            <component name="DaemonCodeAnalyzerSettings" profile="Maxxton" />
-          </application>
-      """.trimIndent()
-    editorFile.writeText(content)
+    return Files.readString(target)
   }
 }

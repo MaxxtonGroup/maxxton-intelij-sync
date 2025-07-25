@@ -23,9 +23,9 @@ This is typically a one-time setup. If you encounter any issues or have suggesti
 
 1. Open IntelliJ IDEA settings.
 2. Navigate to **Editor** -> **Code Style**.
-3. Set the **Scheme** to `Maxxton Code Style [Mold]`.
+3. Set the **Scheme** to `Maxxton Code Style [MOLD]`.
 4. Navigate to **Editor** -> **Inspections**.
-5. Set the **Profile** to `Maxxton Inspections [Mold]`.
+5. Set the **Profile** to `Maxxton Inspections [MOLD]`.
 
 ### Automating Code Style and Inspections with IntelliJ Git Hooks
 
@@ -33,8 +33,8 @@ IntelliJ IDEA supports built-in Git hooks that can be used to enforce code style
 
 1. Open IntelliJ IDEA and open the Settings menu.
 2. Go to **Version Control** -> **Commit**.
-3. Enable the **Cleanup** option and select the `Maxxton Inspections [Mold]` profile.
-4. Enable the **Analyze Code** option and select the `Maxxton Inspections [Mold]` profile.
+3. Enable the **Cleanup** option and select the `Maxxton Inspections [MOLD]` profile.
+4. Enable the **Analyze Code** option and select the `Maxxton Inspections [MOLD]` profile.
 5. Click **OK** to save the settings.
 
 With these settings enabled, IntelliJ IDEA will automatically apply the selected checks and formatting whenever you commit changes.

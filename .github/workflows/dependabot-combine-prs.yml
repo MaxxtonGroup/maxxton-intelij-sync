@@ -5,7 +5,7 @@ name: "Dependabot Combine PRs"
 # Runs well after this repository's weekly Dependabot run (see dependabot.yml).
 on:
   schedule:
-    - cron: "0 4 * * 1"
+    - cron: "0 14 * * 0"
   workflow_dispatch:
 
 permissions:
@@ -16,9 +16,22 @@ jobs:
   combine-prs:
     runs-on: ubuntu-latest
     steps:
+      # Workflows triggered with GITHUB_TOKEN are held for manual approval on the combined PR,
+      # so the App's token is used. Until the App is set up, combining goes on without it.
+      - name: Create a token for the combiner App
+        id: app-token
+        if: vars.COMBINER_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.COMBINER_APP_CLIENT_ID }}
+          private-key: ${{ secrets.COMBINER_APP_PRIVATE_KEY }}
+      - name: Warn that the combiner App is not configured
+        if: vars.COMBINER_APP_CLIENT_ID == ''
+        run: echo "::warning::COMBINER_APP_CLIENT_ID is not set, combining with GITHUB_TOKEN; the combined PR's workflows will wait for approval."
       - name: Combine Dependabot pull requests
         uses: github/combine-prs@v5.2.0
         with:
+          github_token: ${{ steps.app-token.outputs.token || github.token }}
           # Conventional, so repositories that release from commit messages cut a patch.
           pr_title: "fix(deps): weekly Dependabot updates"
           labels: combined-pr,ai-check

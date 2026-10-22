@@ -28,15 +28,16 @@ jobs:
       - name: Warn that the combiner App is not configured
         if: vars.COMBINER_APP_CLIENT_ID == ''
         run: echo "::warning::COMBINER_APP_CLIENT_ID is not set, combining with GITHUB_TOKEN; the combined PR's workflows will wait for approval."
-      - name: Combine Dependabot pull requests
+      - name: Combine dependency pull requests
         uses: github/combine-prs@v5.2.0
         with:
           github_token: ${{ steps.app-token.outputs.token || github.token }}
           # Conventional, so repositories that release from commit messages cut a patch.
-          pr_title: "fix(deps): weekly Dependabot updates"
+          pr_title: "fix(deps): weekly dependency updates"
           labels: combined-pr,ai-check
           # A single Dependabot PR must still become a labelled combined PR.
           min_combine_number: 1
+          branch_regex: "^(dependabot|renovate)/"
           # The combined PR's own CI is the gate.
           # Label a pull request `nocombine` to keep it out (e.g. a major-version fix).
           ci_required: false

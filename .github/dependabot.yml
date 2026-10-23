@@ -116,6 +116,12 @@ updates:
       time: "14:00"
       timezone: "Europe/Amsterdam"
     open-pull-requests-limit: 5
+    # Docker has no security updates, so the default 3-day cooldown also delays
+    # patched base images (node 22.23.4 for CVE-2026-111497 was skipped).
+    cooldown:
+      default-days: 3
+      exclude:
+        - "*"
     groups:
       docker:
         patterns:

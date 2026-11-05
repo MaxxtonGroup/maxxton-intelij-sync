@@ -34,7 +34,7 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token || github.token }}
           # Conventional, so repositories that release from commit messages cut a patch.
           pr_title: "fix(deps): weekly dependency updates"
-          labels: combined-pr,ai-check
+          labels: combined-pr,ai-check,auto-merge
           # A single Dependabot PR must still become a labelled combined PR.
           min_combine_number: 1
           branch_regex: "^(dependabot|renovate)/"
@@ -42,3 +42,8 @@ jobs:
           # Label a pull request `nocombine` to keep it out (e.g. a major-version fix).
           ci_required: false
           create_from_scratch: true
+      - name: Report the failure
+        if: failure()
+        run: |
+          echo "::error::Combining dependency pull requests failed; check this week's combined PR before relying on it."
+          echo "### :x: Dependabot combine failed, the combined PR is missing or incomplete" >> "$GITHUB_STEP_SUMMARY"

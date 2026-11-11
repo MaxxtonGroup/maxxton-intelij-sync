@@ -20,7 +20,7 @@
 #    updates are enabled majors are ignored outright: those are planned migrations.
 #
 # 3. Version updates are only enabled where security updates do not exist (docker,
-#    docker-compose, terraform) or where a version is owned centrally
+#    docker-compose, terraform, helm when opted in) or where a version is owned centrally
 #    (maxxton-version-catalog). Everything else sets `open-pull-requests-limit: 0`,
 #    which disables version updates but leaves security updates untouched. GitHub only
 #    raises security updates on the default branch, so pilot entries for develop and

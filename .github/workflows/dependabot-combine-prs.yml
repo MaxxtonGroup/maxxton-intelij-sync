@@ -34,7 +34,7 @@ jobs:
           github_token: ${{ steps.app-token.outputs.token || github.token }}
           # Conventional, so repositories that release from commit messages cut a patch.
           pr_title: "fix(deps): weekly dependency updates"
-          labels: combined-pr,ai-check,auto-merge
+          labels: combined-pr,ai-check,auto-merge,no-ci
           # A single Dependabot PR must still become a labelled combined PR.
           min_combine_number: 1
           branch_regex: "^(dependabot|renovate)/"

@@ -140,6 +140,13 @@ updates:
       - dependency-name: "*/ubuntu"
         update-types:
           - "version-update:semver-minor"
+      # Dependabot calls python 3.11 -> 3.15 a minor; feature releases are planned upgrades.
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-minor"
+      - dependency-name: "*/python"
+        update-types:
+          - "version-update:semver-minor"
 
   - package-ecosystem: "docker-compose"
     directories:
@@ -170,6 +177,13 @@ updates:
         update-types:
           - "version-update:semver-minor"
       - dependency-name: "*/ubuntu"
+        update-types:
+          - "version-update:semver-minor"
+      # Dependabot calls python 3.11 -> 3.15 a minor; feature releases are planned upgrades.
+      - dependency-name: "python"
+        update-types:
+          - "version-update:semver-minor"
+      - dependency-name: "*/python"
         update-types:
           - "version-update:semver-minor"
 
